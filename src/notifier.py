@@ -1,4 +1,4 @@
-"""Notification senders: Discord, Telegram, Slack."""
+"""Notification senders: Discord, Slack."""
 from __future__ import annotations
 
 import logging
@@ -12,8 +12,6 @@ from src.models import DailyReport, SkinAnalysis
 log = logging.getLogger(__name__)
 
 _discord_url = os.getenv("DISCORD_WEBHOOK_URL", "")
-_tg_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
-_tg_chat = os.getenv("TELEGRAM_CHAT_ID", "")
 _slack_token = os.getenv("SLACK_BOT_TOKEN", "")
 _slack_channel = os.getenv("SLACK_CHANNEL_ID", "")
 
@@ -97,30 +95,6 @@ async def send_discord(report: DailyReport) -> bool:
         return False
 
 
-async def send_telegram(report: DailyReport) -> bool:
-    if not _tg_token or not _tg_chat:
-        log.debug("Telegram not configured")
-        return False
-    msg = build_message(report)
-    url = f"https://api.telegram.org/bot{_tg_token}/sendMessage"
-    chunks = [msg[i : i + 4000] for i in range(0, len(msg), 4000)]
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            for chunk in chunks:
-                r = await client.post(
-                    url,
-                    json={"chat_id": _tg_chat, "text": f"```\n{chunk}\n```", "parse_mode": "MarkdownV2"},
-                )
-                if not r.is_success:
-                    # Retry without parse_mode on formatting error
-                    r = await client.post(url, json={"chat_id": _tg_chat, "text": chunk})
-                r.raise_for_status()
-        log.info("Telegram notification sent")
-        return True
-    except Exception as exc:
-        log.error("Telegram send failed: %s", exc)
-        return False
-
 
 async def send_slack(report: DailyReport) -> bool:
     if not _slack_token or not _slack_channel:
@@ -152,8 +126,7 @@ async def notify_all(report: DailyReport) -> dict[str, bool]:
 
     results = await asyncio.gather(
         send_discord(report),
-        send_telegram(report),
         send_slack(report),
         return_exceptions=False,
     )
-    return {"discord": results[0], "telegram": results[1], "slack": results[2]}
+    return {"discord": results[0], "slack": results[1]}

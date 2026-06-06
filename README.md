@@ -1,6 +1,6 @@
 # 🎮 CS2 Skin Tracker
 
-AI-powered CS2 skin price analysis system. Pulls market data from Steam, CSFloat, Skinport, and Buff163 daily, runs Claude/GPT analysis, and pushes a decision dashboard to Discord/Telegram/Slack.
+AI-powered CS2 skin price analysis system. Pulls market data from Steam, CSFloat, Skinport, and Buff163 daily, runs Claude/GPT analysis, and pushes a decision dashboard to Discord/Slack.
 
 ## Quick Start
 
@@ -14,8 +14,6 @@ AI-powered CS2 skin price analysis system. Pulls market data from Steam, CSFloat
 | `SKIN_LIST` | Comma-separated skin names, e.g. `AK-47 \| Redline (Field-Tested),AWP \| Asiimov (Battle-Scarred)` |
 | `ANTHROPIC_API_KEY` | Claude API key (or set `OPENAI_API_KEY`) |
 | `DISCORD_WEBHOOK_URL` | Discord channel webhook URL |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token |
-| `TELEGRAM_CHAT_ID` | Telegram chat/channel ID |
 
 3. Enable Actions → manually trigger **Daily CS2 Skin Analysis** to test
 

@@ -31,8 +31,6 @@ jobs:
           OPENAI_BASE_URL:      ${{ secrets.OPENAI_BASE_URL }}
           OPENAI_MODEL:         ${{ secrets.OPENAI_MODEL }}
           DISCORD_WEBHOOK_URL:  ${{ secrets.DISCORD_WEBHOOK_URL }}
-          TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
           SLACK_BOT_TOKEN:      ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID:     ${{ secrets.SLACK_CHANNEL_ID }}
           CSFLOAT_API_KEY:      ${{ secrets.CSFLOAT_API_KEY }}
