@@ -1,5 +1,15 @@
 # 🎮 CS2 Skin Tracker
 
+## Screenshots
+
+> Drop your screenshots into a `screenshots/` folder and update the paths below.
+
+| | |
+|:---:|:---:|
+| ![](screenshots/1.png) | ![](screenshots/2.png) |
+
+---
+
 AI-powered CS2 skin price analysis system. Pulls market data from Steam, CSFloat, Skinport, and Buff163 daily, runs Claude/GPT analysis, and pushes a decision dashboard to Discord/Slack.
 
 ## Quick Start
