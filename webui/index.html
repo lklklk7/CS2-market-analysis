@@ -154,11 +154,16 @@
       position: relative; padding: 16px;
     }
     .skin-img-placeholder {
-      width: 120px; height: 90px;
-      background: linear-gradient(135deg, #1e1e30, #2a2a40);
-      border-radius: 4px; display: flex; align-items: center;
-      justify-content: center; font-size: 32px;
+      width: 160px; height: 110px;
+      display: flex; align-items: center; justify-content: center;
     }
+    .skin-img-placeholder img {
+      width: 100%; height: 100%; object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+      transition: transform 0.2s;
+    }
+    .skin-card:hover .skin-img-placeholder img { transform: scale(1.05); }
+    .skin-img-placeholder .fallback { font-size: 32px; }
     .skin-badge {
       position: absolute; top: 10px; left: 10px;
       padding: 3px 8px; border-radius: 4px;
@@ -432,7 +437,9 @@ function skinCard(s) {
   return `
     <div class="skin-card" data-signal="${s.signal}">
       <div class="skin-card-img">
-        <div class="skin-img-placeholder">🔫</div>
+        <div class="skin-img-placeholder" id="img-${btoa(s.market_hash_name).replace(/=/g,'')}">
+          <span class="fallback">🔫</span>
+        </div>
         <span class="skin-badge badge-${s.signal}">${s.signal}</span>
         <span class="skin-score">Score <span>${s.score}</span></span>
       </div>
@@ -500,9 +507,26 @@ function renderDashboard(report) {
   }
   $('cards-grid').innerHTML = currentSkins.map(skinCard).join('');
   filterCards(currentFilter);
+  loadSkinImages(currentSkins);
 }
 
 loadLatestReport();
+
+// ── Lazy skin images ──────────────────────────────────────────
+async function loadSkinImages(skins) {
+  for (const s of skins) {
+    const key = btoa(s.market_hash_name).replace(/=/g, '');
+    const el = document.getElementById(`img-${key}`);
+    if (!el) continue;
+    try {
+      const { url } = await api('GET', `/skin-image/${encodeURIComponent(s.market_hash_name)}`);
+      if (url) {
+        el.innerHTML = `<img src="${url}" alt="${s.market_hash_name}"
+          onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span class=\\'fallback\\'>🔫</span>')" />`;
+      }
+    } catch {}
+  }
+}
 
 // ── Run button ────────────────────────────────────────────────
 let polling = null;
