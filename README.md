@@ -2,13 +2,16 @@
 
 ## Screenshots
 
-screenshot 1 here
-
-screenshot 2 here
-
-screenshot 3 here
-
-screenshot 4 here
+<table>
+  <tr>
+    <td><img src="paste-image-url-here" width="400"/></td>
+    <td><img src="paste-image-url-here" width="400"/></td>
+  </tr>
+  <tr>
+    <td><img src="paste-image-url-here" width="400"/></td>
+    <td><img src="paste-image-url-here" width="400"/></td>
+  </tr>
+</table>
 
 ---
 
