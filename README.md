@@ -4,12 +4,12 @@
 
 <table>
   <tr>
-    <td><img src="paste-image-url-here" width="400"/></td>
-    <td><img src="paste-image-url-here" width="400"/></td>
+    <td><img src="https://cdn.discordapp.com/attachments/1512542345646571614/1512674458274627624/image.png?ex=6a24f35e&is=6a23a1de&hm=3e3d0bbb4d9bbb4e2c33a1ffe7289836bf60808ac95e68220f5b3d26a34cb326&"/></td>
+    <td><img src="https://cdn.discordapp.com/attachments/1512542345646571614/1512674566122504243/image.png?ex=6a24f378&is=6a23a1f8&hm=4affbbc46c575bb61a7ea61b30c8e4631dbfbcb7994275243b99cbcf5f26864b&"/></td>
   </tr>
   <tr>
-    <td><img src="paste-image-url-here" width="400"/></td>
-    <td><img src="paste-image-url-here" width="400"/></td>
+    <td><img src="https://cdn.discordapp.com/attachments/1512542345646571614/1512674834784718958/image.png?ex=6a24f3b8&is=6a23a238&hm=36e7bf1590c1f96339fdc74199689f5a9d07fcafa0dbda28a94bae481a803962&"/></td>
+    <td><img src="https://cdn.discordapp.com/attachments/1512542345646571614/1512675912745877534/image.png?ex=6a24f4b9&is=6a23a339&hm=874a931124142cb4a275e2765fb85776409e4b2dd05dfda0c7b2ed6b97bd51b0&"/></td>
   </tr>
 </table>
 
