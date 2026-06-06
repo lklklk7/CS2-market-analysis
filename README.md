@@ -1,6 +1,6 @@
 # 🎮 CS2 Skin Tracker
 
-## Screenshots
+---
 
 <table>
   <tr>
