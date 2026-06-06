@@ -437,7 +437,7 @@ function skinCard(s) {
   return `
     <div class="skin-card" data-signal="${s.signal}">
       <div class="skin-card-img">
-        <div class="skin-img-placeholder" id="img-${btoa(s.market_hash_name).replace(/=/g,'')}">
+        <div class="skin-img-placeholder" id="img-${s.market_hash_name.replace(/[^a-z0-9]/gi,'_')}">
           <span class="fallback">🔫</span>
         </div>
         <span class="skin-badge badge-${s.signal}">${s.signal}</span>
