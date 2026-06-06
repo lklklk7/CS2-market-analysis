@@ -2,12 +2,13 @@
 
 ## Screenshots
 
-> Drop your screenshots into a `screenshots/` folder and update the paths below.
+screenshot 1 here
 
-| | |
-|:---:|:---:|
-| ![](screenshots/1.png) | ![](screenshots/2.png) |
-| ![](screenshots/3.png) | ![](screenshots/4.png) |
+screenshot 2 here
+
+screenshot 3 here
+
+screenshot 4 here
 
 ---
 
