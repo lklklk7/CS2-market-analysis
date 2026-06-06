@@ -20,7 +20,12 @@ router = APIRouter(prefix="/api")
 
 def _load_watchlist() -> list[str]:
     if WATCHLIST_FILE.exists():
-        return json.loads(WATCHLIST_FILE.read_text())
+        try:
+            data = WATCHLIST_FILE.read_text().strip()
+            if data:
+                return json.loads(data)
+        except Exception:
+            pass
     return [s.strip() for s in os.getenv("SKIN_LIST", "").split(",") if s.strip()]
 
 
