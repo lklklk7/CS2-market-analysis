@@ -5,396 +5,134 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CS2 Market Analysis</title>
   <link rel="icon" type="image/webp" href="/static/favicon.webp"/>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0a0a0e;
-      --surface:   #111117;
-      --surface2:  #18181f;
-      --border:    #222230;
-      --border2:   #2a2a3a;
-      --text:      #e8e8f2;
-      --muted:     #5a5a78;
-      --muted2:    #8888aa;
-      --blue:      #3b82f6;
-      --blue-h:    #2563eb;
-      --green:     #22c55e;
-      --red:       #ef4444;
-      --orange:    #f97316;
-      --gold:      #FFB800;
-      --radius:    8px;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      font-size: 14px;
-    }
-
-    /* ── Navbar ──────────────────────────────────────────────── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; gap: 0;
-      height: 56px; padding: 0 24px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 15px; color: var(--text);
-      text-decoration: none; margin-right: 32px; flex-shrink: 0;
-    }
-    .nav-logo img { width: 28px; height: 28px; }
-    .nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
-    .nav-link {
-      padding: 6px 14px; border-radius: 6px; font-size: 13.5px;
-      color: var(--muted2); cursor: pointer; border: none;
-      background: none; transition: color 0.15s, background 0.15s;
-      font-weight: 500;
-    }
-    .nav-link:hover { color: var(--text); background: var(--surface2); }
-    .nav-link.active { color: var(--text); background: var(--surface2); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px; border-radius: var(--radius);
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      border: none; transition: opacity 0.15s, background 0.15s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-blue { background: var(--blue); color: #fff; }
-    .btn-outline {
-      background: transparent; color: var(--muted2);
-      border: 1px solid var(--border2);
-    }
-    .btn-outline:hover { color: var(--text); border-color: var(--muted2); }
-    .btn-sm { padding: 5px 11px; font-size: 12px; }
-    .status-pill {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: var(--muted2);
-    }
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
-    .status-dot.running { background: var(--green); animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    /* ── Layout ──────────────────────────────────────────────── */
-    .layout { display: flex; min-height: calc(100vh - 56px); }
-    .sidebar {
-      width: 220px; flex-shrink: 0;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 16px 12px;
-    }
-    .sidebar-section { margin-bottom: 24px; }
-    .sidebar-label {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px;
-      padding: 0 8px;
-    }
-    .sidebar-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 10px; border-radius: 6px; cursor: pointer;
-      color: var(--muted2); font-size: 13.5px; font-weight: 500;
-      border: none; background: none; width: 100%; text-align: left;
-      transition: color 0.15s, background 0.15s;
-    }
-    .sidebar-item:hover { color: var(--text); background: var(--surface2); }
-    .sidebar-item.active { color: var(--text); background: var(--surface2); }
-    .sidebar-icon { width: 16px; text-align: center; font-size: 15px; }
-    .content { flex: 1; padding: 24px; overflow-x: hidden; }
-
-    /* ── Pages ───────────────────────────────────────────────── */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    /* ── Page header ─────────────────────────────────────────── */
-    .page-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .page-title { font-size: 18px; font-weight: 700; }
-    .page-sub { font-size: 13px; color: var(--muted2); margin-top: 2px; }
-
-    /* ── Stats bar ───────────────────────────────────────────── */
-    .stats-bar {
-      display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
-    }
-    .stat-card {
-      flex: 1; min-width: 120px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 18px;
-    }
-    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .stat-value { font-size: 22px; font-weight: 700; margin-top: 4px; }
-    .stat-value.green { color: var(--green); }
-    .stat-value.yellow { color: var(--gold); }
-    .stat-value.red { color: var(--red); }
-
-    /* ── Skin cards ──────────────────────────────────────────── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-    }
-    .skin-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: border-color 0.15s, transform 0.1s;
-    }
-    .skin-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-    .skin-card-img {
-      background: linear-gradient(135deg, #13131a 0%, #1e1e2e 100%);
-      height: 140px; display: flex; align-items: center; justify-content: center;
-      position: relative; padding: 16px;
-    }
-    .skin-img-placeholder {
-      width: 160px; height: 110px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .skin-img-placeholder img {
-      width: 100%; height: 100%; object-fit: contain;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
-      transition: transform 0.2s;
-    }
-    .skin-card:hover .skin-img-placeholder img { transform: scale(1.05); }
-    .skin-img-placeholder .fallback { font-size: 32px; }
-    .skin-badge {
-      position: absolute; top: 10px; left: 10px;
-      padding: 3px 8px; border-radius: 4px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
-    }
-    .badge-BUY  { background: rgba(34,197,94,0.2);  color: var(--green);  border: 1px solid rgba(34,197,94,0.3); }
-    .badge-HOLD { background: rgba(255,184,0,0.15); color: var(--gold);   border: 1px solid rgba(255,184,0,0.3); }
-    .badge-SELL { background: rgba(239,68,68,0.15); color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
-    .skin-score {
-      position: absolute; top: 10px; right: 10px;
-      background: rgba(0,0,0,0.6); border: 1px solid var(--border2);
-      border-radius: 4px; padding: 3px 8px;
-      font-size: 11px; color: var(--muted2);
-    }
-    .skin-score span { color: var(--text); font-weight: 700; }
-    .skin-card-body { padding: 14px; }
-    .skin-name { font-weight: 700; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .skin-wear { font-size: 11.5px; color: var(--muted2); margin-top: 2px; }
-    .skin-price-row {
-      display: flex; align-items: baseline; gap: 8px; margin-top: 12px;
-    }
-    .skin-price { font-size: 20px; font-weight: 700; }
-    .skin-change { font-size: 12px; font-weight: 600; }
-    .skin-change.pos { color: var(--green); }
-    .skin-change.neg { color: var(--red); }
-    .float-section { margin-top: 10px; }
-    .float-bar-wrap { position: relative; height: 4px; border-radius: 2px; background: var(--border2); overflow: hidden; margin: 6px 0; }
-    .float-bar-fill {
-      height: 100%;
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .pulse { animation: pulse-dot 1.2s infinite; }
+    .float-bar-gradient {
       background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #eab308 50%, #84cc16 75%, #22c55e 100%);
     }
-    .float-marker {
-      position: absolute; top: -3px; width: 2px; height: 10px;
-      background: #fff; border-radius: 1px;
-      transform: translateX(-50%);
-    }
-    .float-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted2); }
-    .float-info span:last-child { color: var(--text); font-weight: 600; }
-    .skin-meta { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .skin-meta-chip {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px; padding: 3px 8px; font-size: 11px; color: var(--muted2);
-    }
-    .skin-card-actions { display: flex; gap: 8px; margin-top: 12px; }
-    .skin-card-actions .btn { flex: 1; justify-content: center; }
-
-    /* ── Detail panel ─────────────────────────────────────────── */
-    .detail-drawer {
-      display: none; margin-top: 16px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px;
-    }
-    .detail-drawer.open { display: block; }
-    .detail-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .detail-block h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
-    .detail-block ul { padding-left: 16px; }
-    .detail-block li { font-size: 13px; color: var(--muted2); margin: 4px 0; }
-    .detail-summary { font-size: 13px; color: var(--muted2); margin-bottom: 16px; line-height: 1.6; }
-
-    /* ── Table (history) ─────────────────────────────────────── */
-    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left; padding: 10px 16px;
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.07em; color: var(--muted);
-      border-bottom: 1px solid var(--border); background: var(--surface2);
-    }
-    td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--surface2); cursor: pointer; }
-
-    /* ── Watchlist form ──────────────────────────────────────── */
-    .input-row { display: flex; gap: 8px; margin-bottom: 16px; }
-    .cs-input {
-      flex: 1; background: var(--surface2); border: 1px solid var(--border2);
-      color: var(--text); padding: 9px 14px; border-radius: var(--radius);
-      font-size: 13.5px; outline: none;
-      transition: border-color 0.15s;
-    }
-    .cs-input:focus { border-color: var(--blue); }
-    .cs-input::placeholder { color: var(--muted); }
-    .watchlist-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius);
-      margin-bottom: 6px;
-    }
-    .watchlist-row:hover { border-color: var(--border2); }
-    .btn-danger { background: transparent; border: 1px solid rgba(239,68,68,0.4); color: var(--red); }
-    .btn-danger:hover { background: rgba(239,68,68,0.1); opacity: 1; }
-
-    /* ── Chart ───────────────────────────────────────────────── */
-    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
-    .chart-title { font-size: 13px; font-weight: 600; color: var(--muted2); margin-bottom: 16px; }
-
-    /* ── Empty state ─────────────────────────────────────────── */
-    .empty {
-      text-align: center; padding: 60px 20px; color: var(--muted);
-      font-size: 13.5px; line-height: 1.8;
-    }
-    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
-    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .skin-card img { transition: transform 0.2s; }
+    .skin-card:hover img { transform: scale(1.06); }
   </style>
 </head>
-<body>
+<body class="bg-[#0f1923] text-[#e8edf2] min-h-screen text-sm antialiased">
 
-<!-- ── Navbar ──────────────────────────────────────────────────── -->
-<nav>
-  <a class="nav-logo" href="#">
-    <img src="/static/favicon.webp" alt="logo"/>
-    CS2 Market Analysis
-  </a>
-  <div class="nav-links">
-    <button class="nav-link active" data-page="dashboard">Market</button>
-    <button class="nav-link" data-page="watchlist">Watchlist</button>
-    <button class="nav-link" data-page="history">History</button>
+<!-- ── Navbar ─────────────────────────────────────────────────── -->
+<header class="bg-[#1a2332] border-b border-[#2a3f55] sticky top-0 z-50">
+  <div class="max-w-screen-xl mx-auto px-5 h-14 flex items-center gap-4">
+    <a href="#" class="flex items-center gap-2 font-bold text-[15px] shrink-0 mr-2">
+      <img src="/static/favicon.webp" class="w-7 h-7" alt="logo"/>
+      CS2 Market
+    </a>
+    <nav class="flex items-center gap-0.5 flex-1">
+      <button class="nav-btn px-3 py-1.5 rounded text-[13px] font-medium text-[#8fa3b3] hover:text-white hover:bg-[#243447] transition-colors" data-page="dashboard">Market</button>
+      <button class="nav-btn px-3 py-1.5 rounded text-[13px] font-medium text-[#8fa3b3] hover:text-white hover:bg-[#243447] transition-colors" data-page="watchlist">Watchlist</button>
+      <button class="nav-btn px-3 py-1.5 rounded text-[13px] font-medium text-[#8fa3b3] hover:text-white hover:bg-[#243447] transition-colors" data-page="history">History</button>
+    </nav>
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="flex items-center gap-1.5 text-xs text-[#8fa3b3]">
+        <span id="status-dot" class="w-2 h-2 rounded-full bg-[#8fa3b3] inline-block"></span>
+        <span id="status-label">Idle</span>
+      </div>
+      <button id="run-btn" class="bg-[#e2a829] hover:bg-[#c99424] disabled:opacity-50 text-black font-bold text-xs px-4 py-2 rounded transition-colors">
+        ▶&nbsp;Run Analysis
+      </button>
+    </div>
   </div>
-  <div class="nav-right">
-    <div class="status-pill">
-      <div class="status-dot" id="status-dot"></div>
-      <span id="status-label">Idle</span>
+</header>
+
+<!-- ── Content ────────────────────────────────────────────────── -->
+<div class="max-w-screen-xl mx-auto px-5 py-6">
+
+  <!-- ── Dashboard ──────────────────────────────────────────── -->
+  <div id="dashboard" class="page">
+
+    <!-- Stats bar -->
+    <div class="grid grid-cols-4 gap-3 mb-6">
+      <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg px-5 py-4">
+        <div class="text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3] mb-1.5">Analyzed</div>
+        <div class="text-2xl font-bold" id="stat-total">—</div>
+      </div>
+      <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg px-5 py-4">
+        <div class="text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3] mb-1.5">Buy</div>
+        <div class="text-2xl font-bold text-green-400" id="stat-buy">—</div>
+      </div>
+      <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg px-5 py-4">
+        <div class="text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3] mb-1.5">Hold</div>
+        <div class="text-2xl font-bold text-yellow-400" id="stat-hold">—</div>
+      </div>
+      <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg px-5 py-4">
+        <div class="text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3] mb-1.5">Sell</div>
+        <div class="text-2xl font-bold text-red-400" id="stat-sell">—</div>
+      </div>
     </div>
-    <button class="btn btn-blue" id="run-btn">▶&nbsp; Run Analysis</button>
+
+    <!-- Filter tabs -->
+    <div class="flex items-center border-b border-[#2a3f55] mb-5 gap-0">
+      <button class="filter-tab px-4 py-2.5 text-[13px] font-semibold border-b-2 border-[#e2a829] text-white transition-colors" data-filter="all" onclick="filterCards('all')">All</button>
+      <button class="filter-tab px-4 py-2.5 text-[13px] font-semibold border-b-2 border-transparent text-[#8fa3b3] hover:text-white transition-colors" data-filter="BUY" onclick="filterCards('BUY')">Buy</button>
+      <button class="filter-tab px-4 py-2.5 text-[13px] font-semibold border-b-2 border-transparent text-[#8fa3b3] hover:text-white transition-colors" data-filter="HOLD" onclick="filterCards('HOLD')">Hold</button>
+      <button class="filter-tab px-4 py-2.5 text-[13px] font-semibold border-b-2 border-transparent text-[#8fa3b3] hover:text-white transition-colors" data-filter="SELL" onclick="filterCards('SELL')">Sell</button>
+      <span class="ml-auto text-xs text-[#8fa3b3]" id="report-date"></span>
+    </div>
+
+    <!-- Cards grid -->
+    <div id="cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      <div class="col-span-full text-center py-20 text-[#8fa3b3]">
+        <div class="text-5xl mb-4 opacity-30">🎮</div>
+        <div>No report yet — click <strong class="text-white">Run Analysis</strong> to get started.</div>
+      </div>
+    </div>
   </div>
-</nav>
 
-<!-- ── Layout ──────────────────────────────────────────────────── -->
-<div class="layout">
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Overview</div>
-      <button class="sidebar-item active" data-page="dashboard">
-        <span class="sidebar-icon">📊</span> Dashboard
-      </button>
-      <button class="sidebar-item" data-page="watchlist">
-        <span class="sidebar-icon">⭐</span> Watchlist
-      </button>
-      <button class="sidebar-item" data-page="history">
-        <span class="sidebar-icon">🕐</span> Report History
-      </button>
+  <!-- ── Watchlist ───────────────────────────────────────────── -->
+  <div id="watchlist" class="page hidden">
+    <div class="mb-5">
+      <h1 class="text-lg font-bold">Watchlist</h1>
+      <p class="text-xs text-[#8fa3b3] mt-1">Skins tracked in every analysis run</p>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Signals</div>
-      <button class="sidebar-item" id="filter-all" onclick="filterCards('all')">
-        <span class="sidebar-icon">◎</span> All Skins
-      </button>
-      <button class="sidebar-item" id="filter-buy" onclick="filterCards('BUY')">
-        <span class="sidebar-icon" style="color:var(--green)">●</span> Buy
-      </button>
-      <button class="sidebar-item" id="filter-hold" onclick="filterCards('HOLD')">
-        <span class="sidebar-icon" style="color:var(--gold)">●</span> Hold
-      </button>
-      <button class="sidebar-item" id="filter-sell" onclick="filterCards('SELL')">
-        <span class="sidebar-icon" style="color:var(--red)">●</span> Sell
-      </button>
+    <div class="flex gap-2 mb-2">
+      <button id="star-btn" class="bg-[#1e2c3a] border border-[#2a3f55] hover:border-[#8fa3b3] text-[#e2a829] font-bold px-3 py-2 rounded text-sm transition-colors">★</button>
+      <input id="skin-input" type="text" placeholder="★ M9 Bayonet | Scorched (Field-Tested)"
+        class="flex-1 bg-[#1e2c3a] border border-[#2a3f55] focus:border-[#e2a829] text-[#e8edf2] placeholder-[#4a6070] px-3 py-2 rounded outline-none text-sm transition-colors"/>
+      <button id="add-btn" class="bg-[#e2a829] hover:bg-[#c99424] text-black font-bold px-4 py-2 rounded text-sm transition-colors">+ Add</button>
     </div>
-  </aside>
+    <p class="text-[11px] text-[#8fa3b3] mb-5">Knives and gloves require the ★ prefix — click ★ to insert it.</p>
+    <div id="watchlist-items"></div>
+  </div>
 
-  <!-- Main content -->
-  <main class="content">
-
-    <!-- ── Dashboard ────────────────────────────────────────── -->
-    <div id="dashboard" class="page active">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Market Overview</div>
-          <div class="page-sub" id="report-date">Loading latest report…</div>
-        </div>
-      </div>
-
-      <div class="stats-bar" id="stats-bar">
-        <div class="stat-card"><div class="stat-label">Analyzed</div><div class="stat-value" id="stat-total">—</div></div>
-        <div class="stat-card"><div class="stat-label">Buy</div><div class="stat-value green" id="stat-buy">—</div></div>
-        <div class="stat-card"><div class="stat-label">Hold</div><div class="stat-value yellow" id="stat-hold">—</div></div>
-        <div class="stat-card"><div class="stat-label">Sell</div><div class="stat-value red" id="stat-sell">—</div></div>
-      </div>
-
-      <div id="cards-grid" class="cards-grid">
-        <div class="empty">
-          <div class="empty-icon">🎮</div>
-          No report yet — click <strong>Run Analysis</strong> to get started.
-        </div>
-      </div>
+  <!-- ── History ─────────────────────────────────────────────── -->
+  <div id="history" class="page hidden">
+    <div class="mb-5">
+      <h1 class="text-lg font-bold">Report History</h1>
+      <p class="text-xs text-[#8fa3b3] mt-1">Click a date to view the full report</p>
     </div>
-
-    <!-- ── Watchlist ─────────────────────────────────────────── -->
-    <div id="watchlist" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Watchlist</div>
-          <div class="page-sub">Skins tracked in every analysis run</div>
-        </div>
-      </div>
-      <div class="input-row">
-        <button class="btn btn-outline" id="star-btn" title="Insert ★ for knives/gloves">★</button>
-        <input class="cs-input" id="skin-input" type="text" placeholder="★ M9 Bayonet | Scorched (Field-Tested)"/>
-        <button class="btn btn-blue" id="add-btn">+ Add Skin</button>
-      </div>
-      <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px;margin-top:-8px">
-        Knives and gloves require the ★ prefix — click the ★ button to insert it.
-      </div>
-      <div id="watchlist-items"></div>
+    <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg overflow-hidden mb-5">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-[#243447]">
+            <th class="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3]">Date</th>
+            <th class="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3]">Skins</th>
+            <th class="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3]">Buy</th>
+            <th class="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3]">Hold</th>
+            <th class="text-left px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-[#8fa3b3]">Sell</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
     </div>
-
-    <!-- ── History ───────────────────────────────────────────── -->
-    <div id="history" class="page">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Report History</div>
-          <div class="page-sub">Click a date to view the full report</div>
-        </div>
+    <div id="detail-drawer" class="hidden">
+      <div class="font-bold text-base mb-4" id="detail-title"></div>
+      <div class="bg-[#1e2c3a] border border-[#2a3f55] rounded-lg p-5 mb-5">
+        <canvas id="price-chart" height="90"></canvas>
       </div>
-      <div class="table-wrap" id="history-table-wrap">
-        <table>
-          <thead><tr><th>Date</th><th>Skins</th><th>Buy</th><th>Hold</th><th>Sell</th></tr></thead>
-          <tbody id="history-tbody"></tbody>
-        </table>
-      </div>
-      <div class="detail-drawer" id="detail-drawer">
-        <div class="detail-title" id="detail-title"></div>
-        <div class="chart-card"><canvas id="price-chart" height="100"></canvas></div>
-        <div id="detail-cards" class="cards-grid"></div>
-      </div>
+      <div id="detail-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
     </div>
+  </div>
 
-  </main>
-</div>
+</div><!-- /max-w -->
 
 <script>
 const $ = id => document.getElementById(id);
@@ -402,18 +140,23 @@ let priceChart = null;
 let currentSkins = [];
 let currentFilter = 'all';
 
-// ── Navigation ────────────────────────────────────────────────
+// ── Navigation ───────────────────────────────────────────────
 function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link, .sidebar-item[data-page]').forEach(b => b.classList.remove('active'));
-  $(name)?.classList.add('active');
-  document.querySelectorAll(`[data-page="${name}"]`).forEach(b => b.classList.add('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.remove('text-white', 'bg-[#243447]');
+    b.classList.add('text-[#8fa3b3]');
+  });
+  $(name)?.classList.remove('hidden');
+  document.querySelectorAll(`.nav-btn[data-page="${name}"]`).forEach(b => {
+    b.classList.add('text-white', 'bg-[#243447]');
+    b.classList.remove('text-[#8fa3b3]');
+  });
 }
-document.querySelectorAll('[data-page]').forEach(btn => {
-  btn.addEventListener('click', () => showPage(btn.dataset.page));
-});
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => showPage(b.dataset.page)));
+showPage('dashboard');
 
-// ── API ───────────────────────────────────────────────────────
+// ── API ──────────────────────────────────────────────────────
 async function api(method, path, body) {
   const r = await fetch('/api' + path, {
     method,
@@ -423,73 +166,83 @@ async function api(method, path, body) {
   return r.json();
 }
 
-// ── Formatters ────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────
 const fPrice = v => v != null ? `$${v.toFixed(2)}` : 'N/A';
-const fPct   = v => v != null ? `${v >= 0 ? '+' : ''}${v.toFixed(1)}%` : 'N/A';
-const fPctClass = v => v == null ? '' : v >= 0 ? 'pos' : 'neg';
-const fFloat = v => v != null ? v.toFixed(8) : 'N/A';
-const fFloatPct = v => v != null ? `${(v * 100).toFixed(1)}%` : null;
 
-// ── Skin card ─────────────────────────────────────────────────
-function skinCard(s) {
-  const floatPct = fFloatPct(s.csfloat_avg_float ?? (s.avg_float ?? null));
-  const floatVal = s.csfloat_avg_float ?? null;
-  return `
-    <div class="skin-card" data-signal="${s.signal}">
-      <div class="skin-card-img">
-        <div class="skin-img-placeholder" id="img-${s.market_hash_name.replace(/[^a-z0-9]/gi,'_')}">
-          <span class="fallback">🔫</span>
-        </div>
-        <span class="skin-badge badge-${s.signal}">${s.signal}</span>
-        <span class="skin-score">Score <span>${s.score}</span></span>
-      </div>
-      <div class="skin-card-body">
-        <div class="skin-name">${s.market_hash_name}</div>
-        <div class="skin-wear">${s.wear} • ${s.trend}</div>
-        <div class="skin-price-row">
-          <span class="skin-price">${fPrice(s.current_price)}</span>
-          <span class="skin-change ${fPctClass(s.change_7d_pct)}">${fPct(s.change_7d_pct)} 7d</span>
-          <span class="skin-change ${fPctClass(s.change_30d_pct)}">${fPct(s.change_30d_pct)} 30d</span>
-        </div>
-        ${floatVal != null ? `
-        <div class="float-section">
-          <div class="float-bar-wrap">
-            <div class="float-bar-fill" style="width:100%"></div>
-            <div class="float-marker" style="left:${(floatVal * 100).toFixed(1)}%"></div>
-          </div>
-          <div class="float-info">
-            <span>Float</span>
-            <span>${floatVal.toFixed(6)}</span>
-          </div>
-        </div>` : ''}
-        <div class="skin-meta">
-          ${s.buy_target  ? `<span class="skin-meta-chip">🎯 Buy ${fPrice(s.buy_target)}</span>`  : ''}
-          ${s.sell_target ? `<span class="skin-meta-chip">📤 Sell ${fPrice(s.sell_target)}</span>` : ''}
-          ${s.volume_7d_avg ? `<span class="skin-meta-chip">📦 Vol ${s.volume_7d_avg.toLocaleString()}</span>` : ''}
-        </div>
-        ${s.float_insight ? `<div style="font-size:11.5px;color:var(--muted2);margin-top:8px;line-height:1.5">🔬 ${s.float_insight}</div>` : ''}
-        ${(s.risks?.length || s.catalysts?.length) ? `
-        <div class="divider" style="margin:10px 0"></div>
-        ${s.risks?.length ? `<div style="font-size:11.5px;color:var(--muted2);margin-bottom:4px">⚠️ ${s.risks[0]}${s.risks.length > 1 ? ` <span style="color:var(--muted)">+${s.risks.length-1} more</span>` : ''}</div>` : ''}
-        ${s.catalysts?.length ? `<div style="font-size:11.5px;color:var(--muted2)">✨ ${s.catalysts[0]}${s.catalysts.length > 1 ? ` <span style="color:var(--muted)">+${s.catalysts.length-1} more</span>` : ''}</div>` : ''}
-        ` : ''}
-      </div>
-    </div>`;
+function wearShort(wear) {
+  const w = (wear || '').toLowerCase();
+  if (w.includes('factory new'))    return ['FN', 'bg-green-500 text-black'];
+  if (w.includes('minimal wear'))   return ['MW', 'bg-cyan-400 text-black'];
+  if (w.includes('field-tested'))   return ['FT', 'bg-yellow-400 text-black'];
+  if (w.includes('well-worn'))      return ['WW', 'bg-orange-400 text-black'];
+  if (w.includes('battle-scarred')) return ['BS', 'bg-red-500 text-white'];
+  return [wear?.slice(0,2)?.toUpperCase() || '??', 'bg-gray-500 text-white'];
 }
 
-// ── Dashboard ─────────────────────────────────────────────────
-function filterCards(signal) {
-  currentFilter = signal;
-  const grid = $('cards-grid');
-  grid.querySelectorAll('.skin-card').forEach(card => {
-    card.style.display = (signal === 'all' || card.dataset.signal === signal) ? '' : 'none';
+function signalBadge(signal) {
+  if (signal === 'BUY')  return 'text-green-400 border-green-500/40 bg-green-500/10';
+  if (signal === 'SELL') return 'text-red-400 border-red-500/40 bg-red-500/10';
+  return 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10';
+}
+
+// ── BUFF-style skin card ─────────────────────────────────────
+function skinCard(s) {
+  const key = s.market_hash_name.replace(/[^a-z0-9]/gi, '_');
+  const isKnife = s.market_hash_name.startsWith('★');
+  const [wearLabel, wearCls] = wearShort(s.wear);
+  const floatVal = s.csfloat_avg_float ?? null;
+  const chg7 = s.change_7d_pct;
+  const chg7txt = chg7 != null ? `${chg7 >= 0 ? '+' : ''}${chg7.toFixed(1)}%` : null;
+  const chg7cls = chg7 == null ? '' : chg7 >= 0 ? 'text-green-400' : 'text-red-400';
+
+  return `
+  <div class="skin-card group bg-[#1e2c3a] border border-[#2a3f55] hover:border-[#4a6f90] rounded-lg overflow-hidden transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 cursor-pointer" data-signal="${s.signal}">
+    <!-- Image zone -->
+    <div class="relative bg-gradient-to-b from-[#131f2b] to-[#1a2c3d] h-32 flex items-center justify-center overflow-hidden px-3 py-2">
+      <span class="${wearCls} text-[9px] font-bold px-1.5 py-0.5 rounded absolute top-2 left-2 leading-none">${isKnife ? '★ ' : ''}${wearLabel}</span>
+      <span class="text-[9px] text-[#8fa3b3] bg-black/50 px-1.5 py-0.5 rounded absolute top-2 right-2 leading-none">${s.score}</span>
+      <div id="img-${key}" class="w-full h-full flex items-center justify-center">
+        <span class="text-4xl opacity-20">🔫</span>
+      </div>
+    </div>
+    <!-- Body -->
+    <div class="px-3 pt-2 pb-3">
+      ${floatVal != null ? `
+      <div class="relative h-[3px] rounded-full overflow-hidden mb-1.5 float-bar-gradient">
+        <div class="absolute top-[-3px] w-[2px] h-[9px] bg-white rounded-full shadow-md" style="left:${(floatVal*100).toFixed(1)}%"></div>
+      </div>
+      <div class="flex justify-between text-[9px] text-[#8fa3b3] mb-1.5">
+        <span>Float</span><span class="text-[#e8edf2] font-mono">${floatVal.toFixed(6)}</span>
+      </div>` : `<div class="h-[22px] mb-1.5"></div>`}
+      <div class="text-[11px] font-medium text-[#c8d8e8] leading-tight truncate mb-2" title="${s.market_hash_name}">${s.market_hash_name}</div>
+      <div class="flex items-center justify-between">
+        <span class="text-[#e2a829] font-bold text-[13px]">${fPrice(s.current_price)}</span>
+        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border ${signalBadge(s.signal)}">${s.signal}</span>
+      </div>
+      ${chg7txt ? `<div class="text-[10px] mt-1 ${chg7cls}">${chg7txt} <span class="text-[#8fa3b3]">7d</span></div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Dashboard ────────────────────────────────────────────────
+function filterCards(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.skin-card').forEach(c => {
+    c.style.display = (filter === 'all' || c.dataset.signal === filter) ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    const active = t.dataset.filter === filter;
+    t.classList.toggle('border-[#e2a829]', active);
+    t.classList.toggle('text-white', active);
+    t.classList.toggle('border-transparent', !active);
+    t.classList.toggle('text-[#8fa3b3]', !active);
   });
 }
 
 async function loadLatestReport() {
   const { dates } = await api('GET', '/reports');
   if (!dates?.length) return;
-  $('report-date').textContent = `Last report: ${dates[0]}`;
+  $('report-date').textContent = `Last: ${dates[0]}`;
   const report = await api('GET', `/reports/${dates[0]}`);
   renderDashboard(report);
 }
@@ -497,12 +250,12 @@ async function loadLatestReport() {
 function renderDashboard(report) {
   currentSkins = report.skins || [];
   $('stat-total').textContent = currentSkins.length;
-  $('stat-buy').textContent  = currentSkins.filter(s => s.signal === 'BUY').length;
-  $('stat-hold').textContent = currentSkins.filter(s => s.signal === 'HOLD').length;
-  $('stat-sell').textContent = currentSkins.filter(s => s.signal === 'SELL').length;
+  $('stat-buy').textContent   = currentSkins.filter(s => s.signal === 'BUY').length;
+  $('stat-hold').textContent  = currentSkins.filter(s => s.signal === 'HOLD').length;
+  $('stat-sell').textContent  = currentSkins.filter(s => s.signal === 'SELL').length;
 
   if (!currentSkins.length) {
-    $('cards-grid').innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No skins in this report.</div>';
+    $('cards-grid').innerHTML = '<div class="col-span-full text-center py-20 text-[#8fa3b3]"><div class="text-5xl mb-4 opacity-30">📭</div>No skins in this report.</div>';
     return;
   }
   $('cards-grid').innerHTML = currentSkins.map(skinCard).join('');
@@ -512,22 +265,23 @@ function renderDashboard(report) {
 
 loadLatestReport();
 
-// ── Skin images ───────────────────────────────────────────────
+// ── Skin images ──────────────────────────────────────────────
 function loadSkinImages(skins) {
   for (const s of skins) {
     if (!s.image_url) continue;
     const key = s.market_hash_name.replace(/[^a-z0-9]/gi, '_');
     const el = document.getElementById(`img-${key}`);
     if (!el) continue;
-    el.innerHTML = `<img src="${s.image_url}" alt="${s.market_hash_name}"
-      onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span class=\\'fallback\\'>🔫</span>')" />`;
+    el.innerHTML = `<img src="${s.image_url}" alt="${s.market_hash_name}" class="w-full h-full object-contain drop-shadow-lg"
+      onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'text-4xl opacity-20',textContent:'🔫'}))" />`;
   }
 }
 
-// ── Run button ────────────────────────────────────────────────
+// ── Run button ───────────────────────────────────────────────
 let polling = null;
 $('run-btn').addEventListener('click', async () => {
   $('run-btn').disabled = true;
+  $('run-btn').textContent = '…';
   await api('POST', '/analyze/run');
   startPolling();
 });
@@ -536,30 +290,30 @@ function startPolling() {
   if (polling) return;
   polling = setInterval(async () => {
     const { status } = await api('GET', '/analyze/status');
-    const dot = $('status-dot'), lbl = $('status-label');
     if (status === 'running') {
-      dot.className = 'status-dot running';
-      lbl.textContent = 'Running…';
+      $('status-dot').className = 'w-2 h-2 rounded-full bg-green-400 inline-block pulse';
+      $('status-label').textContent = 'Running…';
     } else {
-      dot.className = 'status-dot';
-      lbl.textContent = 'Idle';
+      $('status-dot').className = 'w-2 h-2 rounded-full bg-[#8fa3b3] inline-block';
+      $('status-label').textContent = 'Idle';
       clearInterval(polling); polling = null;
       $('run-btn').disabled = false;
+      $('run-btn').textContent = '▶ Run Analysis';
       await loadLatestReport();
     }
   }, 3000);
 }
 
-// ── Watchlist ─────────────────────────────────────────────────
+// ── Watchlist ────────────────────────────────────────────────
 async function renderWatchlist() {
   const { skins } = await api('GET', '/watchlist');
   $('watchlist-items').innerHTML = skins.length
     ? skins.map(s => `
-        <div class="watchlist-row">
-          <span style="font-size:13.5px;font-weight:500">${s}</span>
-          <button class="btn btn-sm btn-danger btn-outline" data-skin="${s}">Remove</button>
+        <div class="flex items-center justify-between px-4 py-3 bg-[#1e2c3a] border border-[#2a3f55] hover:border-[#4a6f90] rounded-lg mb-2 transition-colors">
+          <span class="text-sm font-medium">${s}</span>
+          <button class="btn-danger text-[11px] font-semibold text-red-400 border border-red-500/30 hover:bg-red-500/10 px-2.5 py-1 rounded transition-colors" data-skin="${s}">Remove</button>
         </div>`).join('')
-    : '<div class="empty"><div class="empty-icon">⭐</div>Add skins above to start tracking them.</div>';
+    : '<div class="text-center py-16 text-[#8fa3b3]"><div class="text-5xl mb-4 opacity-30">⭐</div>Add skins above to start tracking them.</div>';
 
   document.querySelectorAll('.btn-danger').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -575,7 +329,6 @@ $('star-btn').addEventListener('click', () => {
   if (!inp.value.startsWith('★')) inp.value = '★ ' + inp.value;
   inp.focus();
 });
-
 $('add-btn').addEventListener('click', async () => {
   const val = $('skin-input').value.trim();
   if (!val) return;
@@ -585,26 +338,25 @@ $('add-btn').addEventListener('click', async () => {
 });
 $('skin-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('add-btn').click(); });
 
-// ── History ───────────────────────────────────────────────────
+// ── History ──────────────────────────────────────────────────
 async function renderHistory() {
   const { dates } = await api('GET', '/reports');
   const tbody = $('history-tbody');
   if (!dates?.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px">No reports yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-[#8fa3b3]">No reports yet</td></tr>';
     return;
   }
   const rows = await Promise.all(dates.map(async d => {
     const r = await api('GET', `/reports/${d}`);
-    const skins = r.skins || [];
-    return { d, skins };
+    return { d, skins: r.skins || [] };
   }));
   tbody.innerHTML = rows.map(({ d, skins }) => `
-    <tr data-date="${d}">
-      <td style="font-weight:600">${d}</td>
-      <td>${skins.length}</td>
-      <td style="color:var(--green);font-weight:600">${skins.filter(s=>s.signal==='BUY').length}</td>
-      <td style="color:var(--gold);font-weight:600">${skins.filter(s=>s.signal==='HOLD').length}</td>
-      <td style="color:var(--red);font-weight:600">${skins.filter(s=>s.signal==='SELL').length}</td>
+    <tr class="border-t border-[#2a3f55] hover:bg-[#243447] cursor-pointer transition-colors" data-date="${d}">
+      <td class="px-4 py-3 font-semibold">${d}</td>
+      <td class="px-4 py-3 text-[#8fa3b3]">${skins.length}</td>
+      <td class="px-4 py-3 font-semibold text-green-400">${skins.filter(s=>s.signal==='BUY').length}</td>
+      <td class="px-4 py-3 font-semibold text-yellow-400">${skins.filter(s=>s.signal==='HOLD').length}</td>
+      <td class="px-4 py-3 font-semibold text-red-400">${skins.filter(s=>s.signal==='SELL').length}</td>
     </tr>`).join('');
 
   tbody.querySelectorAll('tr').forEach(row => {
@@ -617,41 +369,38 @@ async function loadHistoryDetail(d) {
   const report = await api('GET', `/reports/${d}`);
   const skins = report.skins || [];
   const drawer = $('detail-drawer');
-  drawer.classList.add('open');
+  drawer.classList.remove('hidden');
   $('detail-title').textContent = `Report — ${d}`;
 
-  // Chart
   if (priceChart) priceChart.destroy();
-  const ctx = $('price-chart').getContext('2d');
-  priceChart = new Chart(ctx, {
+  priceChart = new Chart($('price-chart').getContext('2d'), {
     type: 'bar',
     data: {
-      labels: skins.map(s => s.name || s.market_hash_name.split('|')[0].trim()),
+      labels: skins.map(s => (s.name || s.market_hash_name.split('|')[0]).trim()),
       datasets: [
         {
           label: 'Price (USD)',
           data: skins.map(s => s.current_price || 0),
-          backgroundColor: skins.map(s => s.signal === 'BUY' ? 'rgba(34,197,94,0.5)' : s.signal === 'SELL' ? 'rgba(239,68,68,0.5)' : 'rgba(255,184,0,0.4)'),
-          borderColor: skins.map(s => s.signal === 'BUY' ? '#22c55e' : s.signal === 'SELL' ? '#ef4444' : '#FFB800'),
+          backgroundColor: skins.map(s => s.signal==='BUY' ? 'rgba(74,222,128,0.35)' : s.signal==='SELL' ? 'rgba(248,113,113,0.35)' : 'rgba(250,204,21,0.3)'),
+          borderColor:     skins.map(s => s.signal==='BUY' ? '#4ade80' : s.signal==='SELL' ? '#f87171' : '#facc15'),
           borderWidth: 1, yAxisID: 'y',
         },
         {
-          label: 'Score',
+          label: 'Score', type: 'line',
           data: skins.map(s => s.score),
-          type: 'line', borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,0.1)',
-          pointBackgroundColor: '#3b82f6', pointRadius: 4,
-          fill: true, tension: 0.3, yAxisID: 'y1',
+          borderColor: '#e2a829', backgroundColor: 'rgba(226,168,41,0.08)',
+          pointBackgroundColor: '#e2a829', pointRadius: 4,
+          fill: true, tension: 0.35, yAxisID: 'y1',
         },
       ],
     },
     options: {
       responsive: true,
-      plugins: { legend: { labels: { color: '#8888aa', font: { size: 12 } } } },
+      plugins: { legend: { labels: { color: '#8fa3b3', font: { size: 11 } } } },
       scales: {
-        y:  { ticks: { color: '#5a5a78', callback: v => `$${v}` }, grid: { color: '#18181f' } },
-        y1: { position: 'right', min: 0, max: 100, ticks: { color: '#5a5a78' }, grid: { drawOnChartArea: false } },
-        x:  { ticks: { color: '#5a5a78' }, grid: { color: '#18181f' } },
+        y:  { ticks: { color: '#8fa3b3', callback: v => `$${v}` }, grid: { color: '#243447' } },
+        y1: { position: 'right', min: 0, max: 100, ticks: { color: '#8fa3b3' }, grid: { drawOnChartArea: false } },
+        x:  { ticks: { color: '#8fa3b3' }, grid: { color: '#243447' } },
       },
     },
   });
