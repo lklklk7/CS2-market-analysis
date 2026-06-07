@@ -671,17 +671,58 @@ function startPolling() {
 
 /* ── Watchlist ───────────────────────────────────────────────── */
 async function renderWatchlist() {
-  const { skins } = await api('GET', '/watchlist');
-  $('watchlist-items').innerHTML = skins.length
-    ? skins.map(s => `
+  const [{ skins: watchlist }, { dates }] = await Promise.all([
+    api('GET', '/watchlist'),
+    api('GET', '/reports'),
+  ]);
+
+  // Build image + signal map from latest report
+  const infoMap = {};
+  if (dates?.length) {
+    const report = await api('GET', `/reports/${dates[0]}`);
+    for (const s of (report.skins || [])) {
+      infoMap[s.market_hash_name] = { image_url: s.image_url, signal: s.signal, current_price: s.current_price };
+    }
+  }
+
+  $('watchlist-items').innerHTML = watchlist.length
+    ? watchlist.map(s => {
+        const info = infoMap[s] || {};
+        const sigClass = info.signal ? `sig-${info.signal}` : '';
+        const sigHtml = info.signal
+          ? `<span class="${sigClass}" style="font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;letter-spacing:0.03em">${info.signal}</span>`
+          : '';
+        const priceHtml = info.current_price != null
+          ? `<span style="font-size:12px;font-weight:700;color:var(--gold)">$${info.current_price.toFixed(2)}</span>`
+          : '';
+        return `
         <div class="watchlist-row">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:18px;opacity:0.5">${s.startsWith('★') ? '🔪' : '🔫'}</span>
-            <span style="font-size:13.5px;font-weight:500">${s}</span>
+          <div style="display:flex;align-items:center;gap:14px;min-width:0">
+            <div style="width:80px;height:54px;flex-shrink:0;background:linear-gradient(145deg,#0d1b2e,#172040);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(51,65,85,0.5)" id="wl-img-${s.replace(/[^a-z0-9]/gi,'_')}">
+              <span style="font-size:22px;opacity:0.2">${s.startsWith('★') ? '🔪' : '🔫'}</span>
+            </div>
+            <div style="min-width:0">
+              <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+                ${priceHtml}
+                ${sigHtml}
+              </div>
+            </div>
           </div>
-          <button class="btn btn-danger btn-sm" style="padding:5px 12px;font-size:11.5px" data-skin="${s}">Remove</button>
-        </div>`).join('')
+          <button class="btn btn-danger" style="padding:5px 12px;font-size:11.5px;flex-shrink:0" data-skin="${s}">Remove</button>
+        </div>`;
+      }).join('')
     : `<div class="empty"><div class="empty-icon">⭐</div><h3>No skins tracked</h3><p>Add skins above to start tracking them in every analysis run.</p></div>`;
+
+  // Inject images
+  for (const s of watchlist) {
+    const info = infoMap[s] || {};
+    if (!info.image_url) continue;
+    const el = document.getElementById(`wl-img-${s.replace(/[^a-z0-9]/gi,'_')}`);
+    if (!el) continue;
+    el.innerHTML = `<img src="${info.image_url}" style="width:100%;height:100%;object-fit:contain;padding:4px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6))"
+      onerror="this.replaceWith(Object.assign(document.createElement('span'),{style:'font-size:22px;opacity:0.2',textContent:'${s.startsWith('★') ? '🔪' : '🔫'}'}))" />`;
+  }
 
   document.querySelectorAll('.btn-danger').forEach(btn => {
     btn.addEventListener('click', async () => {
